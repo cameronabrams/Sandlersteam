@@ -4,6 +4,8 @@
 
 Sandlersteam implements a python interface to the steam tables found in Appendix III of _Chemical, Biochemical, and Engineering Thermodynamics_ (5th edition) by Stan Sandler (Wiley, USA). It should be used for educational purposes only.
 
+The interface operates similarly to the IAPWS steam tables (which you should use instead of these).
+
 ## Installation
 
 Sandlersteam is available via `pip`:
@@ -31,6 +33,8 @@ Below we create a `State` object to define a thermodynamic state for steam at 10
 
 ## Release History
 
+* 0.1.1
+    * Updated pyproject.toml and README.md
 * 0.1.0
     * Initial version
 
