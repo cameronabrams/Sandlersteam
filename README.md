@@ -6,7 +6,7 @@ Sandlersteam implements a python interface to the steam tables found in Appendix
 
 The interface operates similarly to the IAPWS steam tables (which you should use instead of these).
 
-## Installation
+## Installation 
 
 Sandlersteam is available via `pip`:
 
