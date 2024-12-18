@@ -1,0 +1,13 @@
+__pycache__
+__pycache__/**
+build/
+*.egg-info
+*.aux
+*.log
+*.pytxcode
+*.pyc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.pdf
+pythontex-files-*/
