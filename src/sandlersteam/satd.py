@@ -3,7 +3,7 @@ import importlib
 import os
 import numpy as np
 import pandas as pd
-from .util import pformatter, add_headers
+from .util import pformatter, add_headers, svi
 from scipy.interpolate import interp1d
 
 class SATD:
@@ -34,16 +34,10 @@ class SATD:
             if pu=='kPa':
                 df['P']=df['P']/1000.0
             ndf=df[colorder]
-            # print(ndf.info())
-            # print(ndf.head())
             D.append(ndf)
         self.DF['P']=pd.concat(D,axis=0)
         self.DF['P'].sort_values(by='P',inplace=True)
-        # print(self.DF['P'].head())
-        # print(self.DF['P'].tail())
-        # print(self.DF['P'].info())
         self.lim['P']=[self.DF['P']['P'].min(),self.DF['P']['P'].max()]
-        # print(self.lim)
         D=[]
         for f,pu in zip(tfn,punits):
             data_abs_path=os.path.join(inst_root,'data',f)
@@ -51,10 +45,8 @@ class SATD:
             if pu=='kPa':
                 df['P']=df['P']/1000.0
             ndf=df[colorder]
-            # print(ndf.head())
             D.append(ndf)
         self.DF['T']=pd.concat(D,axis=0)
-        # print(self.DF['T'].describe())
         self.DF['T'].sort_values(by='T',inplace=True)
         self.lim['T']=[self.DF['T']['T'].min(),self.DF['T']['T'].max()]
 
@@ -64,9 +56,9 @@ class SATD:
             X=np.array(self.DF[bp][bp].to_list())
             for p in [cp,'VL','VV','UL','UV','HL','HV','SL','SV']:
                 Y=np.array(self.DF[bp][p].to_list())
-                self.interpolators[bp][p]=interp1d(X,Y,kind='linear')
+                self.interpolators[bp][p]=svi(interp1d(X,Y,kind='linear'))
                 
-    def texprint(self,**kwargs):
+    def to_latex(self,**kwargs):
         by=kwargs.get('by','T')
         cp='T' if by=='P' else 'P'
         assert by in 'PT'

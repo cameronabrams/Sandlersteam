@@ -31,8 +31,39 @@ Below we create a `State` object to define a thermodynamic state for steam at 10
 7.3614
 ```
 
+Specifying a state requires values for two independent state variables.  The state variables recognized by sandlersteam are:
+
+* `T` temperature in C
+* `P` pressure in MPa
+* `u` specific internal energy in kJ/kg
+* `v` specific volume in m<sup>3</sup>/kg
+* `h` specific enthalpy in kJ/kg
+* `s` specific entropy in kJ/kg
+* `x` quality; mass fraction of vapor in a saturated vapor/liquid system (between 0 and 1)
+
+Initializing a `State` instance with any two of these values set by keyword parameters results in the other
+properties receiving values by (bi)linear interpolation.
+
+When specifying quality, a `State` objects acquires `Liquid` and `Vapor` attributes that each hold intensive, saturated single-phase property values.  The property value attributes owned directly by the `State` object reflect the quality-weighted sum of the respective single-phase values:
+
+```python
+>>> s = State(T=100,x=0.5)
+>>> s.P
+0.10135
+>>> s.v
+0.836972
+>>> s.Vapor.v
+1.6729
+>>> s.Liquid.v
+0.001044
+>>> 0.5*(s.Vapor.v+s.Liquid.v)
+0.836972
+```
+
 ## Release History
 
+* 0.1.2
+    * Updated interpolators
 * 0.1.1
     * Updated pyproject.toml and README.md
 * 0.1.0

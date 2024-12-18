@@ -42,15 +42,13 @@ class State:
         p=self.spec[0]
         cp='P' if p=='T' else 'T'
         th=self.spec[1]
-        # print(f'{p} = {self.__dict__[p]} ({self.satd.lim[p][0]}-{self.satd.lim[p][1]}), {th} = {self.__dict__[th]}')
         if self.satd.lim[p][0]<self.__dict__[p]<self.satd.lim[p][1]:
             ''' T or P is between saturation limits; may be a saturated state, so 
                 check whether the second property value lies between its liquid
                 and vapor phase values at this T or P '''
-            thL=self.satd.interpolators[p][f'{th.upper()}L'](self.__dict__[p])
-            thV=self.satd.interpolators[p][f'{th.upper()}V'](self.__dict__[p])
-            # print(f'{th}L = {thL}, {th}V = {thV}')
-            self.__dict__[cp]=self.satd.interpolators[p][cp](self.__dict__[p])
+            thL=self.satd.interpolators[p][f'{th.upper()}L'](self.__dict__[p])[0]
+            thV=self.satd.interpolators[p][f'{th.upper()}V'](self.__dict__[p])[0]
+            self.__dict__[cp]=self.satd.interpolators[p][cp](self.__dict__[p])[0]
             if thL<self.__dict__[th]<thV:
                 ''' This is a saturated state! Use lever rule to get vapor fraction: '''
                 self.x=(self.__dict__[th]-thL)/(thV-thL)
@@ -60,7 +58,7 @@ class State:
                 self.Vapor.__dict__[th]=thV
                 for pp in self._sp:
                     if pp not in ['T','P',f'{th.upper()}V',f'{th.upper()}L']:
-                        ppp=self.satd.interpolators[p][pp](self.__dict__[p])
+                        ppp=self.satd.interpolators[p][pp](self.__dict__[p])[0]
                         if pp[-1]=='V':
                             self.Vapor.__dict__[pp[0].lower()]=ppp
                         elif pp[-1]=='L':
@@ -73,8 +71,6 @@ class State:
                 specdict={p.upper():self.__dict__[p] for p in self.spec}
                 if self.__dict__[th]<thL:
                     ''' Th is below its liquid-state value; assume this is a subcooled state '''
-                    # icode=''.join([x.upper() for x in self.spec])
-                    # dofv=[self.__dict__[p] for p in self.spec]
                     retdict=self.subc.Bilinear(specdict)
                     for p in self._p: 
                         if p not in self.spec and p!='x':
@@ -87,8 +83,6 @@ class State:
                             self.__dict__[p]=retdict[p.upper()]
         elif self.__dict__[p]>self.satd.lim[p][1]:
             ''' Th is above its vapor-state value; assume this is a superheated state '''
-            # icode=''.join([x.upper() for x in self.spec])
-            # dofv=[self.__dict__[p] for p in self.spec]
             specdict={p.upper():self.__dict__[p] for p in self.spec}
             retdict=self.suph.Bilinear(specdict)
             for p in self._p: 
@@ -107,7 +101,7 @@ class State:
         assert self.spec==['T','P']
         specdict={'T':self.T,'P':self.P}
         if self.satd.lim['T'][0]<self.T<self.satd.lim['T'][1]:
-            Psat=self.satd.interpolators['T']['P'](self.T)
+            Psat=self.satd.interpolators['T']['P'](self.T)[0]
         else:
             Psat=LARGE
         if self.P>Psat:
@@ -134,7 +128,6 @@ class State:
             for q in self._sp:
                 if q!='T':
                     prop=self.satd.interpolators['T'][q](self.T)
-                    # print(q,prop)
                     if q=='P': self.__dict__[q]=prop
                     if q[-1]=='V':
                         self.Vapor.__dict__[q[0].lower()]=prop
@@ -150,7 +143,7 @@ class State:
             ''' Assign all other property values by interpolation '''
             for q in self._sp:
                 if q!='P':
-                    prop=self.satd.interpolators['P'][q](self.P)        
+                    prop=self.satd.interpolators['P'][q](self.P)[0]
                     if q=='T': self.__dict__[q]=prop
                     if q[-1]=='V':
                         self.Vapor.__dict__[q[0].lower()]=prop
@@ -180,7 +173,7 @@ class State:
             ''' Assign all other property values '''
             for q in self._sp:
                 if q!='T':
-                    prop=self.satd.interpolators['T'][q](self.T)
+                    prop=self.satd.interpolators['T'][q](self.T)[0]
                     if q=='P': self.__dict__[q]=prop
                     if q[-1]=='V':
                         self.Vapor.__dict__[q[0].lower()]=prop

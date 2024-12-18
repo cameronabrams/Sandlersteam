@@ -3,6 +3,13 @@ import io
 import pandas as pd
 import numpy as np
 
+class svi:
+    # wrap the interp1d function so that it returns a scalar
+    def __init__(self,f):
+        self.f=f
+    def __call__(self,x):
+        return self.f(x).item()
+
 def add_headers(tblstr,hdllist,strs):
     tbllns=tblstr.split('\n')
     for i in range(len(tbllns)):

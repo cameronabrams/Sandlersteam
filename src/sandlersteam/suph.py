@@ -71,46 +71,25 @@ class SUPH:
         Pval.extend(P)
         data='\n'.join(lines[plines[-1]+1:])
         ndf=my_split(data,hder,P,Tsat,fixw=(phase=='L'))
-        # ndf=ndf.sort_values(by='T')
-        # print(ndf.to_string())
         DFS.append(ndf)
         self.data=pd.concat(DFS,ignore_index=True)
-        # print(self.data.to_string())
-        # self.data.dropna(inplace=True,axis=0)
-        # Pressures=self.data['P'].unique()
-        # for P in Pressures:
-        #     print(f'sorting T at P {P}')
-        #     sorted_subframe=self.data[self.data['P']==P].sort_values(by='T').reset_index(drop=True)
-        #     print(sorted_subframe.to_string())
-        #     self.data[self.data['P']==P]=sorted_subframe
-        # self.data.reset_index(drop=True,inplace=True)
-        # print(self.data.to_string())
-        # return
-        # print(f'Superheated steam table: {self.data["T"].min()}<T(C)<{self.data["T"].max()} {self.data["P"].min()}<P(MPa)<{self.data["P"].max()} ')
         dof=self.data.columns
-        # print(dof)
         self.uniqs={}
         for d in dof:
             self.uniqs[d]=np.sort(np.array(list(set(self.data[d].to_list()))))
-        #     print(f'{d}')
-        #     print(f'{self.uniqs[d]}')
-        # exit()
+        
+        # specify all interpolators for all possible pairs of state variables
         self.interpolators={}
         for i in range(len(dof)):
             X=np.array(self.data[dof[i]].to_list())
             for j in range(i+1,len(dof)):
                 Y=np.array(self.data[dof[j]].to_list())
-                # print(dof[i],dof[j])
                 self.interpolators[f'{dof[i]}{dof[j]}']={}
                 for k in range(len(dof)):
                     if k != i and k != j:
-                        # print(f'   -> {dof[k]}')
                         Z=np.array(self.data[dof[k]].to_list())
-                        # for x,y,z in zip(X,Y,Z):
-                        #     print(x,y,z)
-                        I=LinearNDInterpolator(list(zip(X,Y)),Z)
-                        self.interpolators[f'{dof[i]}{dof[j]}'][dof[k]]=I
-        # print(self.interpolators)
+                        self.interpolators[f'{dof[i]}{dof[j]}'][dof[k]]=LinearNDInterpolator(list(zip(X,Y)),Z)
+
     def TPBilinear(self,specdict):
         retdict={}
         xn,yn=specdict.keys()
@@ -121,25 +100,16 @@ class SUPH:
         retdict={}
         retdict['T']=xi
         retdict['P']=yi
-        # retdict['MATCH']=False
         tdf=df[df['P']==yi]
         if not tdf.empty:
-            # print(f'Found SH block for P = {yi}')
             X=np.array(tdf['T'])
-            # reidx=np.argsort(X)
-            # X=X[reidx]
-            # retdict['MATCH']=np.any([xi==x for x in X])
-            # print(f'X {X}')
             for d in dof:
                 if d not in 'TP':
-                    Y=np.array(tdf[d])#[reidx]
+                    Y=np.array(tdf[d])
                     retdict[d]=np.interp(xi,X,Y)
-                    # print(f'interpolating {d} X {X} Y {Y} at x {xi} => {retdict[d]}')
-            # print(f'returning {retdict}')
         else:
             for PL,PR in zip(self.uniqs['P'][:-1],self.uniqs['P'][1:]):
                 if PL<yi<PR:
-                    # print(f'Found {PL} < {yi} < {PR}')
                     break
             else:
                 raise Exception(f'P {yi} not between {PL} and {PR}')
@@ -148,28 +118,20 @@ class SUPH:
             RDF=df[df['P']==PR]
             LT=np.array(LDF['T'])
             RT=np.array(RDF['T'])
-            # print(f'LT {LT}')
-            # print(f'RT {RT}')
             CT=np.array([T for T in LT if T in RT])
-            # print(f'Common T {CT}')
             if xi in CT:
-                # print(f'Found line(s) for T {xi}')
                 for d in dof:
                     if d not in 'TP':
                         Y=np.array([LDF[LT==xi][d].values[0],RDF[RT==xi][d].values[0]])
-                        # print(f'X {X} Y {Y} yi {yi}')
                         retdict[d]=np.interp(yi,X,Y)
             else:
                 for TL,TR in zip(CT[:-1],CT[1:]):
                     if TL<xi<TR:
-                        # print(f'Found {TL} < {xi} < {TR}')
                         break
                 else:
                     raise Exception(f'T {xi} not between {TL} and {TR}')
                 LTDF=LDF[(LDF['T']==TL)|(LDF['T']==TR)].sort_values(by='T')
                 RTDF=RDF[(RDF['T']==TL)|(RDF['T']==TR)].sort_values(by='T')
-                # print(LTDF.to_string())
-                # print(RTDF.to_string())
                 iv=np.zeros(2)
                 for p in dof:
                     if not p in 'TP':
@@ -177,12 +139,11 @@ class SUPH:
                             Lp=LTDF[p].values[i]
                             Rp=RTDF[p].values[i]
                             Y=np.array([Lp,Rp])
-                            # print(f'{p} {Lp} {Rp}')
                             iv[i]=np.interp(yi,X,Y)
                         retdict[p]=np.interp(xi,np.array([TL,TR]),iv)
         return retdict
 
-    def texprint(self,P):
+    def to_latex(self,P):
         block=self.data[self.data['P']==P][['T','V','U','H','S']]
         if not block.empty:
             block_floatsplit=pd.DataFrame()
@@ -209,7 +170,6 @@ class SUPH:
                         d.append(ss)
                     
                 block_floatsplit[c+'d']=d
-                # block_floatsplit[c+'d'][block_floatsplit[c+'d']==0]=None
             title=r'\begin{minipage}{0.6\textwidth}'+'\n'+r'\footnotesize\vspace{5mm}'+'\n'+r'\begin{center}'+'\n'+r'$P$ = '+f'{P}'+r' MPa\\*[1ex]'+'\n'
             fmts =r'>{\raggedleft}p{8mm}@{}p{5mm}' # T
             fmts+=r'>{\raggedleft}p{4mm}@{}p{10mm}' # V
@@ -294,7 +254,6 @@ class SUPH:
             for pp in dof:
                 Y=np.array([ldict[pp],rdict[pp]])
                 retdict[pp]=np.interp(xi,X,Y)
-        # print(f'PThBilinear ret {retdict}')
         return retdict
     
     def ThThBilinear(self,specdict):
