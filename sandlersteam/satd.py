@@ -1,15 +1,14 @@
 # Author: Cameron F Abrams <cfa22@drexel.edu>
-import importlib
+
 import os
 import numpy as np
 import pandas as pd
-from .util import pformatter, add_headers, svi
+from .util import pformatter, add_headers, svi, data_path
 from scipy.interpolate import interp1d
 
 class SATD:
     def __init__(self):
-        with importlib.resources.path('sandlersteam','__init__.py') as f:
-            inst_root=os.path.split(os.path.abspath(f.parent.parent))[0]
+        data=data_path()
         pfn=['SandlerSatdSteamTableP1.txt','SandlerSatdSteamTableP2.txt']
         tfn=['SandlerSatdSteamTableT1.txt','SandlerSatdSteamTableT2.txt']
         punits=['kPa','MPa']
@@ -29,7 +28,7 @@ class SATD:
         self.lim={}
         D=[]
         for f,pu in zip(pfn,punits):
-            data_abs_path=os.path.join(inst_root,'data',f)
+            data_abs_path=os.path.join(data,f)
             df=pd.read_csv(data_abs_path,sep=r'\s+',header=0,index_col=None)
             if pu=='kPa':
                 df['P']=df['P']/1000.0
@@ -40,7 +39,7 @@ class SATD:
         self.lim['P']=[self.DF['P']['P'].min(),self.DF['P']['P'].max()]
         D=[]
         for f,pu in zip(tfn,punits):
-            data_abs_path=os.path.join(inst_root,'data',f)
+            data_abs_path=os.path.join(data,f)
             df=pd.read_csv(data_abs_path,sep=r'\s+',header=0,index_col=None)
             if pu=='kPa':
                 df['P']=df['P']/1000.0

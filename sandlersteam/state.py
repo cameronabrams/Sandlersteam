@@ -5,9 +5,12 @@ from scipy.interpolate import interp1d
 from .satd import SATD
 from .suph import SUPH
 
-_SATD=SATD()
-_SUPH=SUPH('V')
-_SUBC=SUPH('L')
+
+SteamTables=dict(
+    satd=SATD(),
+    suph=SUPH('V'),
+    subc=SUPH('L')
+)
 
 class PHASE:
     def __init__(self):
@@ -46,9 +49,9 @@ class State:
             ''' T or P is between saturation limits; may be a saturated state, so 
                 check whether the second property value lies between its liquid
                 and vapor phase values at this T or P '''
-            thL=self.satd.interpolators[p][f'{th.upper()}L'](self.__dict__[p])[0]
-            thV=self.satd.interpolators[p][f'{th.upper()}V'](self.__dict__[p])[0]
-            self.__dict__[cp]=self.satd.interpolators[p][cp](self.__dict__[p])[0]
+            thL=self.satd.interpolators[p][f'{th.upper()}L'](self.__dict__[p])
+            thV=self.satd.interpolators[p][f'{th.upper()}V'](self.__dict__[p])
+            self.__dict__[cp]=self.satd.interpolators[p][cp](self.__dict__[p])
             if thL<self.__dict__[th]<thV:
                 ''' This is a saturated state! Use lever rule to get vapor fraction: '''
                 self.x=(self.__dict__[th]-thL)/(thV-thL)
@@ -58,7 +61,7 @@ class State:
                 self.Vapor.__dict__[th]=thV
                 for pp in self._sp:
                     if pp not in ['T','P',f'{th.upper()}V',f'{th.upper()}L']:
-                        ppp=self.satd.interpolators[p][pp](self.__dict__[p])[0]
+                        ppp=self.satd.interpolators[p][pp](self.__dict__[p])
                         if pp[-1]=='V':
                             self.Vapor.__dict__[pp[0].lower()]=ppp
                         elif pp[-1]=='L':
@@ -101,7 +104,7 @@ class State:
         assert self.spec==['T','P']
         specdict={'T':self.T,'P':self.P}
         if self.satd.lim['T'][0]<self.T<self.satd.lim['T'][1]:
-            Psat=self.satd.interpolators['T']['P'](self.T)[0]
+            Psat=self.satd.interpolators['T']['P'](self.T)
         else:
             Psat=LARGE
         if self.P>Psat:
@@ -143,7 +146,7 @@ class State:
             ''' Assign all other property values by interpolation '''
             for q in self._sp:
                 if q!='P':
-                    prop=self.satd.interpolators['P'][q](self.P)[0]
+                    prop=self.satd.interpolators['P'][q](self.P)
                     if q=='T': self.__dict__[q]=prop
                     if q[-1]=='V':
                         self.Vapor.__dict__[q[0].lower()]=prop
@@ -173,7 +176,7 @@ class State:
             ''' Assign all other property values '''
             for q in self._sp:
                 if q!='T':
-                    prop=self.satd.interpolators['T'][q](self.T)[0]
+                    prop=self.satd.interpolators['T'][q](self.T)
                     if q=='P': self.__dict__[q]=prop
                     if q[-1]=='V':
                         self.Vapor.__dict__[q[0].lower()]=prop
@@ -186,9 +189,9 @@ class State:
             raise Exception(f'Could not interpolate {p} = {th} at quality {x} from saturated steam table')
         
     def __init__(self,**kwargs):
-        self.satd=_SATD
-        self.suph=_SUPH
-        self.subc=_SUBC
+        self.satd=SteamTables['satd']
+        self.suph=SteamTables['suph']
+        self.subc=SteamTables['subc']
         for p in self._p:
             self.__dict__[p]=kwargs.get(p,None)
         self._resolve()

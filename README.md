@@ -60,9 +60,50 @@ When specifying quality, a `State` objects acquires `Liquid` and `Vapor` attribu
 0.836972
 ```
 
+One can also import the `SteamTables` dictionary from the state `state` module and then generate LaTeX-compatible versions of either blocks in the superheated/subcooled steam tables or entire saturated steam stables, listed by temperature or pressure. For example:
+
+```python
+>>> from sandlersteam.state import SteamTables as st
+>>> print(st['suph'].to_latex(P=1.0))  # generates latex for the 1 MPa block of the superheated steam table
+```
+```
+\begin{minipage}{0.6\textwidth}
+\footnotesize\vspace{5mm}
+\begin{center}
+$P$ = 1.0 MPa\\*[1ex]
+\begin{tabular}{>{\raggedleft}p{8mm}@{}p{5mm}>{\raggedleft}p{4mm}@{}p{10mm}>{\raggedleft}p{10mm}@{}p{3mm}>{\raggedleft}p{10mm}@{}p{3mm}>{\raggedleft\arraybackslash}p{3mm}@{}p{8mm}}
+\toprule
+\multicolumn{2}{c}{$T$~($^\circ$C)} & \multicolumn{2}{c}{$\hat{V}$} & \multicolumn{2}{c}{$\hat{U}$} & \multicolumn{2}{c}{$\hat{H}$} & \multicolumn{2}{c}{$\hat{S}$}\\
+\toprule
+\midrule
+179 & .91 & 0 & .19444 & 2583 & .6 & 2778 & .1 & 6 & .5865 \\
+200 &  & 0 & .2060 & 2621 & .9 & 2827 & .9 & 6 & .6940 \\
+250 &  & 0 & .2327 & 2709 & .9 & 2942 & .6 & 6 & .9247 \\
+300 &  & 0 & .2579 & 2793 & .2 & 3051 & .2 & 7 & .1229 \\
+350 &  & 0 & .2825 & 2875 & .2 & 3157 & .7 & 7 & .3011 \\
+400 &  & 0 & .3066 & 2957 & .3 & 3263 & .9 & 7 & .4651 \\
+500 &  & 0 & .3541 & 3124 & .4 & 3478 & .5 & 7 & .7622 \\
+600 &  & 0 & .4011 & 3296 & .8 & 3697 & .9 & 8 & .0290 \\
+700 &  & 0 & .4478 & 3475 & .3 & 3923 & .1 & 8 & .2731 \\
+800 &  & 0 & .4943 & 3660 & .4 & 4154 & .7 & 8 & .4996 \\
+900 &  & 0 & .5407 & 3852 & .2 & 4392 & .9 & 8 & .7118 \\
+1000 &  & 0 & .5871 & 4050 & .5 & 4637 & .6 & 8 & .9119 \\
+1100 &  & 0 & .6335 & 4255 & .1 & 4888 & .6 & 9 & .1017 \\
+1200 &  & 0 & .6798 & 4465 & .6 & 5145 & .4 & 9 & .2822 \\
+1300 &  & 0 & .7261 & 4681 & .3 & 5407 & .4 & 9 & .4543 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{minipage}
+```
+
+This renders as
+
+![a steam table block](stimage.png "1 MPa superheated steam table block")
+
 ## Release History
 
-* 0.1.2
+* 0.1.5
     * Updated interpolators
 * 0.1.1
     * Updated pyproject.toml and README.md

@@ -1,21 +1,19 @@
 # Author: Cameron F. Abrams <cfa22@drexel.edu>
 
-from importlib import resources
 import os
 import numpy as np
 import pandas as pd
-from .util import add_headers, my_split
+from .util import add_headers, my_split, data_path
 from scipy.interpolate import LinearNDInterpolator
 
 class SUPH:
     def __init__(self,phase='V'):
-        with resources.path('sandlersteam','__init__.py') as f:
-            inst_root=os.path.split(os.path.abspath(f.parent.parent))[0]
+        data=data_path()
         if phase=='V':
             ff='SandlerSuphSteamTables.txt'
         elif phase=='L':
             ff='SandlerSubcSteamTables.txt'
-        fn=os.path.join(inst_root,'data',ff)
+        fn=os.path.join(data,ff)
         # read in entire text file
         with open(fn,'r') as f:
             lines=f.read().split('\n')
@@ -144,6 +142,7 @@ class SUPH:
         return retdict
 
     def to_latex(self,P):
+        # generates latex version of a P-block of the superheated/subcooled steam table
         block=self.data[self.data['P']==P][['T','V','U','H','S']]
         if not block.empty:
             block_floatsplit=pd.DataFrame()

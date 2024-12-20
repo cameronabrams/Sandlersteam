@@ -2,6 +2,8 @@
 import io
 import pandas as pd
 import numpy as np
+from importlib import resources
+import os
 
 class svi:
     # wrap the interp1d function so that it returns a scalar
@@ -9,6 +11,10 @@ class svi:
         self.f=f
     def __call__(self,x):
         return self.f(x).item()
+
+def data_path():
+    with resources.as_file(resources.files('sandlersteam')) as src_root:
+        return os.path.join(src_root,'data')
 
 def add_headers(tblstr,hdllist,strs):
     tbllns=tblstr.split('\n')
