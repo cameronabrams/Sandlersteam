@@ -103,6 +103,8 @@ This renders as
 
 ## Release History
 
+* 0.1.7
+    * Updated pandas indexing for saturated table LaTeX printing
 * 0.1.5
     * Updated interpolators
 * 0.1.1

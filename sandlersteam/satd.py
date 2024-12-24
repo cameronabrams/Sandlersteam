@@ -64,7 +64,7 @@ class SATD:
         block=self.DF[by]
         if not block.empty:
             splits=[block[block['T']<97.0],block[block['T']>97.0]]
-            splits[0]['P']=splits[0]['P']*1000 # kPa from MPa
+            splits[0].loc[:,'P']=splits[0].loc[:,'P']*1000 # kPa from MPa
             strsplits=[]
             for bs,pu in zip(splits,['kPa','MPa']):
                 block_floatsplit=pd.DataFrame()
