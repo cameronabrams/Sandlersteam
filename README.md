@@ -99,10 +99,13 @@ $P$ = 1.0 MPa\\*[1ex]
 
 This renders as
 
-![a steam table block](stimage.png "1 MPa superheated steam table block")
+![a steam table block](https://github.com/cameronabrams/Sandlersteam/raw/main/stimage.png)
+<!-- ![a steam table block](stimage.png "1 MPa superheated steam table block") -->
 
 ## Release History
 
+* 0.1.8
+    * Update readme
 * 0.1.7
     * Updated pandas indexing for saturated table LaTeX printing
 * 0.1.5
