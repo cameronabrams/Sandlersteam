@@ -104,6 +104,8 @@ This renders as
 
 ## Release History
 
+* 0.1.9
+    * bugfix: allows for specification of `x` as 0
 * 0.1.8
     * Update readme
 * 0.1.7

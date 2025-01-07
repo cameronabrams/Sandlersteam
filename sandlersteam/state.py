@@ -25,8 +25,8 @@ class State:
     def _resolve(self):
         """ Resolve the thermodynamic state of steam/water given specifications
         """
-        self.spec=[p for p in self._p if self.__dict__[p]]
-        assert len(self.spec)==2,f'Error: must specify two properties (of {self._p}) for steam'
+        self.spec=[p for p in self._p if self.__dict__[p]!=None]
+        assert len(self.spec)==2,f'Error: must specify two properties (of {self._p}) for steam; found {self.spec}'
         if self.spec[1]=='x':
             ''' explicitly saturated '''
             self._resolve_satd()
