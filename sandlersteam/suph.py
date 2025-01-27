@@ -169,7 +169,7 @@ class SUPH:
                         d.append(ss)
                     
                 block_floatsplit[c+'d']=d
-            title=r'\begin{minipage}{0.6\textwidth}'+'\n'+r'\footnotesize\vspace{5mm}'+'\n'+r'\begin{center}'+'\n'+r'$P$ = '+f'{P}'+r' MPa\\*[1ex]'+'\n'
+            title=r'\noindent\begin{minipage}{0.6\textwidth}'+'\n'+r'\footnotesize\vspace{5mm}'+'\n'+r'\begin{center}'+'\n'+r'$P$ = '+f'{P}'+r' MPa\\*[1ex]'+'\n'
             fmts =r'>{\raggedleft}p{8mm}@{}p{5mm}' # T
             fmts+=r'>{\raggedleft}p{4mm}@{}p{10mm}' # V
             fmts+=r'>{\raggedleft}p{10mm}@{}p{3mm}' # U

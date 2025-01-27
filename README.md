@@ -104,6 +104,8 @@ This renders as
 
 ## Release History
 
+* 0.2.0
+    * Added the `Request` class for dynamically selecting and outputting (as LaTeX) steam table blocks requested by (for example) exam problems
 * 0.1.9
     * bugfix: allows for specification of `x` as 0
 * 0.1.8
