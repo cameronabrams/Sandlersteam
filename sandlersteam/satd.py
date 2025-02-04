@@ -3,12 +3,15 @@
 import os
 import numpy as np
 import pandas as pd
-from .util import pformatter, add_headers, svi, data_path
+from .util import pformatter, add_headers, svi
 from scipy.interpolate import interp1d
+from . import data
+
+__data_path__=os.path.dirname(data.__file__)
 
 class SATD:
     def __init__(self):
-        data=data_path()
+        data=__data_path__
         pfn=['SandlerSatdSteamTableP1.txt','SandlerSatdSteamTableP2.txt']
         tfn=['SandlerSatdSteamTableT1.txt','SandlerSatdSteamTableT2.txt']
         punits=['kPa','MPa']

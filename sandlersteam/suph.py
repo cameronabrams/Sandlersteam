@@ -3,12 +3,14 @@
 import os
 import numpy as np
 import pandas as pd
-from .util import add_headers, my_split, data_path
-from scipy.interpolate import LinearNDInterpolator
+from .util import add_headers, my_split
+from scipy.interpolate import RegularGridInterpolator,LinearNDInterpolator
+from . import data
+__data_path__=os.path.dirname(data.__file__)
 
 class SUPH:
     def __init__(self,phase='V'):
-        data=data_path()
+        data=__data_path__
         if phase=='V':
             ff='SandlerSuphSteamTables.txt'
         elif phase=='L':
@@ -77,16 +79,38 @@ class SUPH:
             self.uniqs[d]=np.sort(np.array(list(set(self.data[d].to_list()))))
         
         # specify all interpolators for all possible pairs of state variables
-        self.interpolators={}
-        for i in range(len(dof)):
-            X=np.array(self.data[dof[i]].to_list())
-            for j in range(i+1,len(dof)):
-                Y=np.array(self.data[dof[j]].to_list())
-                self.interpolators[f'{dof[i]}{dof[j]}']={}
-                for k in range(len(dof)):
-                    if k != i and k != j:
-                        Z=np.array(self.data[dof[k]].to_list())
-                        self.interpolators[f'{dof[i]}{dof[j]}'][dof[k]]=LinearNDInterpolator(list(zip(X,Y)),Z)
+        # these are not used since they don't do bilinear interpolation the way
+        # a student would with physical steam tables
+        # self.interpolators={}
+        # for i in range(len(dof)):
+        #     X=np.array(self.data[dof[i]].to_list())
+        #     for j in range(i+1,len(dof)):
+        #         Y=np.array(self.data[dof[j]].to_list())
+        #         mainkey=''.join([dof[i],dof[j]])
+        #         self.interpolators[mainkey]={}
+        #         for k in range(len(dof)):
+        #             if k != i and k != j:
+        #                 Z=np.array(self.data[dof[k]].to_list())
+        #                 self.interpolators[mainkey][dof[k]]=LinearNDInterpolator(list(zip(X,Y)),Z)
+
+    # def GenBilinear(self,specdict):
+    #     retdict={}
+    #     # df=self.data
+    #     dof=list(self.data.columns)
+    #     mainkeyL=[]
+    #     deps=[]
+    #     for d in dof:
+    #         if d in specdict.keys():
+    #             mainkeyL.append(d)
+    #             retdict[d]=specdict[d]
+    #         else:
+    #             deps.append(d)
+    #     assert len(mainkeyL)==2,f'Must specify two valid degrees of freedom from {dof}; I found {specdict.keys()}'
+    #     mainkey=''.join(mainkeyL)
+    #     args=[specdict[k] for k in mainkeyL]
+    #     for d in deps:
+    #         retdict[d]=float(self.interpolators[mainkey][d](*args))
+    #     return retdict
 
     def TPBilinear(self,specdict):
         retdict={}
@@ -104,7 +128,7 @@ class SUPH:
             for d in dof:
                 if d not in 'TP':
                     Y=np.array(tdf[d])
-                    retdict[d]=np.interp(xi,X,Y)
+                    retdict[d]=np.interp(xi,X,Y,left=np.nan,right=np.nan)
         else:
             for PL,PR in zip(self.uniqs['P'][:-1],self.uniqs['P'][1:]):
                 if PL<yi<PR:
@@ -121,7 +145,7 @@ class SUPH:
                 for d in dof:
                     if d not in 'TP':
                         Y=np.array([LDF[LT==xi][d].values[0],RDF[RT==xi][d].values[0]])
-                        retdict[d]=np.interp(yi,X,Y)
+                        retdict[d]=np.interp(yi,X,Y,left=np.nan,right=np.nan)
             else:
                 for TL,TR in zip(CT[:-1],CT[1:]):
                     if TL<xi<TR:
@@ -137,7 +161,7 @@ class SUPH:
                             Lp=LTDF[p].values[i]
                             Rp=RTDF[p].values[i]
                             Y=np.array([Lp,Rp])
-                            iv[i]=np.interp(yi,X,Y)
+                            iv[i]=np.interp(yi,X,Y,left=np.nan,right=np.nan)
                         retdict[p]=np.interp(xi,np.array([TL,TR]),iv)
         return retdict
 
@@ -209,7 +233,7 @@ class SUPH:
                 LLdat['P'].append(P)
                 for d in 'VUSH':
                     Y=np.array(tdf[d])
-                    LLdat[d].append(np.interp(xi,X,Y))
+                    LLdat[d].append(np.interp(xi,X,Y,left=np.nan,right=np.nan))
         X=np.array(LLdat[yn])
         retdict['P']=np.interp(yi,X,np.array(LLdat['P']))
         for d in 'VUSH':
@@ -233,7 +257,7 @@ class SUPH:
             X=np.array(tdf[yn])
             for pp in dof:
                 Y=np.array(tdf[pp])
-                retdict[pp]=np.interp(yi,X,Y)
+                retdict[pp]=np.interp(yi,X,Y,left=np.nan,right=np.nan)
         else:
             for PL,PR in zip(self.uniqs['P'][:-1],self.uniqs['P'][1:]):
                 if PL<xi<PR:
@@ -248,11 +272,11 @@ class SUPH:
                 X=xdf[yn]
                 for pp in dof:
                     Y=np.array(xdf[pp])
-                    d[pp]=np.interp(yi,X,Y)
+                    d[pp]=np.interp(yi,X,Y,left=np.nan,right=np.nan)
             X=np.array([PL,PR])
             for pp in dof:
                 Y=np.array([ldict[pp],rdict[pp]])
-                retdict[pp]=np.interp(xi,X,Y)
+                retdict[pp]=np.interp(xi,X,Y,left=np.nan,right=np.nan)
         return retdict
     
     def ThThBilinear(self,specdict):
@@ -273,7 +297,7 @@ class SUPH:
                 if d!='T' and d!=xn:
                     Y=np.array(tdf[d])
                     if Y.min()<yi<Y.max():
-                        LLdat[d]=np.interp(xi,X,Y)
+                        LLdat[d]=np.interp(xi,X,Y,left=np.nan,right=np.nan)
         X=LLdat[yn]
         retdict={}
         retdict[xn]=xi
