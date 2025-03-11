@@ -36,12 +36,13 @@ class Request:
             tables.append(unit_string)
 
         if any(self.subc):
+            tables.append(r"""\vspace{1cm}""")
             tables.append(r"""Subcooled liquid:\\*[1cm]""")
         for p in sorted(self.subc):
             tables.append(st['subc'].to_latex(P=p))
         
         if self.satdP or self.satdT:
-            if len(self.suph)>1:
+            if len(self.suph)+len(self.subc)>1:
                 tables.append(r"""\clearpage""")
             tables.append(r"""Saturated steam:\\*[5mm]""")
             if self.satdP:
