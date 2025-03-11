@@ -22,13 +22,17 @@ def test_request_make():
     assert(len(R.suph)==2)
     R.register(suphP=-99.999)
     assert(len(R.suph)==2)
+    R.register(subcP=50.0)
+    assert(len(R.subc)==1)
+
 
 def test_request_latex():
     R=Request()
     R.register(suphP=0.1)
     R.register('satdP')
     R.register(suphP=0.2)
+    R.register(subcP=50.0)
     output=R.to_latex()
-    # with open('out.tex','w') as f:
-    #     f.write(output)
+    with open('out.tex','w') as f:
+        f.write(output)
     

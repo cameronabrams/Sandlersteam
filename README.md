@@ -104,6 +104,8 @@ This renders as
 
 ## Release History
 
+* 0.3.0:
+    * Included subcooled liquid data in the `Request` capability
 * 0.2.1
     * bugfix:  set `left` and `right` parameters in all `numpy.interp()` to `numpy.nan` to override the pinning default for extrapolated values
 * 0.2.0

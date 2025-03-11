@@ -4,6 +4,7 @@ from .state import SteamTables as st
 class Request:
     def __init__(self):
         self.suph=[]
+        self.subc=[]
         self.satdP=False
         self.satdT=False
     def register(self,*args,**kwargs):
@@ -15,6 +16,10 @@ class Request:
             P=kwargs['suphP']
             if P in st['suph'].uniqs['P'] and not P in self.suph:
                 self.suph.append(P)
+        if 'subcP' in kwargs:
+            P=kwargs['subcP']
+            if P in st['subc'].uniqs['P'] and not P in self.subc:
+                self.subc.append(P)
 
     def to_latex(self):
         unit_string=r"""\noindent $\hat{V}\ [=]\ \mbox{m$^3$/kg}$; $\hat{U}\ [=]\ \mbox{kJ/kg}$; $\hat{H}\ [=]\ \mbox{kJ/kg}$; $\hat{S}\ [=]\ \mbox{kJ/kg-K}$"""
@@ -29,6 +34,11 @@ class Request:
             tables.append(st['suph'].to_latex(P=p))
         if any(self.suph):
             tables.append(unit_string)
+
+        if any(self.subc):
+            tables.append(r"""Subcooled liquid:\\*[1cm]""")
+        for p in sorted(self.subc):
+            tables.append(st['subc'].to_latex(P=p))
         
         if self.satdP or self.satdT:
             if len(self.suph)>1:
