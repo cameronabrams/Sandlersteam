@@ -33,10 +33,9 @@ class Request:
         for p in sorted(self.suph):
             tables.append(st['suph'].to_latex(P=p))
         if any(self.suph):
-            tables.append(unit_string)
+            tables.append(unit_string+r'\\*[1cm]')
 
         if any(self.subc):
-            tables.append(r"""\vspace{1cm}""")
             tables.append(r"""Subcooled liquid:\\*[1cm]""")
         for p in sorted(self.subc):
             tables.append(st['subc'].to_latex(P=p))
