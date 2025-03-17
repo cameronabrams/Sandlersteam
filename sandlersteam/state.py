@@ -197,28 +197,53 @@ class State:
         self._resolve()
 
 class RandomSample(State):
-    def __init__(self,phase='suph',satdDOF='T',seed=None):
+    def __init__(self,phase='suph',satdDOF='T',seed=None,Prange=None,Trange=None):
         if phase=='satd':
             if satdDOF=='T':
-                if seed:
-                    sample=SteamTables[phase].DF['T'].sample(n=1,random_state=seed)
-                else:
-                    sample=SteamTables[phase].DF['T'].sample(n=1)
+                sample_this=SteamTables[phase].DF['T']
+            else:
+                sample_this=SteamTables[phase].DF['P']
+        elif phase=='suph' or phase=='subc':
+            sample_this=SteamTables[phase].data
+        abs_mins={'T':sample_this['T'].min(),'P':sample_this['P'].min()}
+        abs_maxs={'T':sample_this['T'].max(),'P':sample_this['P'].max()}
+        sample=sample_this.sample(n=1,random_state=seed)
+        T=sample['T'].values[0]
+        P=sample['P'].values[0]
+        if Trange and not Prange:
+            if Trange[0]<abs_mins['T']:
+                raise ValueError(f'Trange[0] ({Trange[0]}) is below the minimum T in the data ({abs_mins["T"]})')
+            if Trange[1]>abs_maxs['T']:
+                raise ValueError(f'Trange[1] ({Trange[1]}) is above the maximum T in the data ({abs_maxs["T"]})')
+            while not Trange[0]<T<Trange[1]:
+                sample=sample_this.sample(n=1)
                 T=sample['T'].values[0]
+        if Prange and not Trange:
+            if Prange[0]<abs_mins['P']:
+                raise ValueError(f'Prange[0] ({Prange[0]}) is below the minimum P in the data ({abs_mins["P"]})')
+            if Prange[1]>abs_maxs['P']:
+                raise ValueError(f'Prange[1] ({Prange[1]}) is above the maximum P in the data ({abs_maxs["P"]})')
+            while not Prange[0]<P<Prange[1]:
+                sample=sample_this.sample(n=1)
+                P=sample['P'].values[0]
+        if Prange and Trange:
+            if Trange[0]<abs_mins['T']:
+                raise ValueError(f'Trange[0] ({Trange[0]}) is below the minimum T in the data ({abs_mins["T"]})')
+            if Trange[1]>abs_maxs['T']:
+                raise ValueError(f'Trange[1] ({Trange[1]}) is above the maximum T in the data ({abs_maxs["T"]})')
+            if Prange[0]<abs_mins['P']: 
+                raise ValueError(f'Prange[0] ({Prange[0]}) is below the minimum P in the data ({abs_mins["P"]})')
+            if Prange[1]>abs_maxs['P']: 
+                raise ValueError(f'Prange[1] ({Prange[1]}) is above the maximum P in the data ({abs_maxs["P"]})')
+            while not Prange[0]<P<Prange[1] or not Trange[0]<T<Trange[1]:
+                sample=sample_this.sample(n=1)
+                T=sample['T'].values[0]
+                P=sample['P'].values[0]
+        if phase=='satd':
+            if satdDOF=='T':
                 super().__init__(T=T,x=1.0)
             else:
-                if seed:
-                    sample=SteamTables[phase].DF['P'].sample(n=1,random_state=seed)
-                else:   
-                    sample=SteamTables[phase].DF['P'].sample(n=1)
-                P=sample['P'].values[0]
                 super().__init__(P=P,x=1.0)
         else:
-            if seed:
-                sample=SteamTables[phase].data.sample(n=1,random_state=seed)
-            else:
-                sample=SteamTables[phase].data.sample(n=1)
-            T=sample['T'].values[0]
-            P=sample['P'].values[0]
             super().__init__(T=T,P=P)
     

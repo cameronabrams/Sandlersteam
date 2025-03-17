@@ -134,7 +134,7 @@ class SUPH:
                 if PL<yi<PR:
                     break
             else:
-                raise Exception(f'P {yi} not between {PL} and {PR}')
+                raise Exception(f'P {yi} not between {self.uniqs["P"][0]} and {self.uniqs["P"][-1]} at {xi} C')
             X=np.array([PL,PR])
             LDF=df[df['P']==PL]
             RDF=df[df['P']==PR]
@@ -151,7 +151,7 @@ class SUPH:
                     if TL<xi<TR:
                         break
                 else:
-                    raise Exception(f'T {xi} not between {TL} and {TR}')
+                    raise Exception(f'T {xi} not between {CT[0]} and {CT[-1]} at {yi} MPa')
                 LTDF=LDF[(LDF['T']==TL)|(LDF['T']==TR)].sort_values(by='T')
                 RTDF=RDF[(RDF['T']==TL)|(RDF['T']==TR)].sort_values(by='T')
                 iv=np.zeros(2)

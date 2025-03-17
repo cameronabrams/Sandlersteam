@@ -1,5 +1,6 @@
 from sandlersteam.request import Request
 from sandlersteam.state import SteamTables as st
+import pytest
 
 def test_request_init():
     R=Request()
