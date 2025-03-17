@@ -104,6 +104,8 @@ This renders as
 
 ## Release History
 
+* 0.4.0:
+    * `RandomState` class introduced
 * 0.3.3:
     * Included subcooled liquid data in the `Request` capability
 * 0.2.1
