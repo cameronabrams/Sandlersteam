@@ -197,18 +197,27 @@ class State:
         self._resolve()
 
 class RandomSample(State):
-    def __init__(self,phase='suph',satdDOF='T'):
+    def __init__(self,phase='suph',satdDOF='T',seed=None):
         if phase=='satd':
             if satdDOF=='T':
-                sample=SteamTables[phase].DF['T'].sample(n=1)
+                if seed:
+                    sample=SteamTables[phase].DF['T'].sample(n=1,random_state=seed)
+                else:
+                    sample=SteamTables[phase].DF['T'].sample(n=1)
                 T=sample['T'].values[0]
                 super().__init__(T=T,x=1.0)
             else:
-                sample=SteamTables[phase].DF['P'].sample(n=1)
+                if seed:
+                    sample=SteamTables[phase].DF['P'].sample(n=1,random_state=seed)
+                else:   
+                    sample=SteamTables[phase].DF['P'].sample(n=1)
                 P=sample['P'].values[0]
                 super().__init__(P=P,x=1.0)
         else:
-            sample=SteamTables[phase].data.sample(n=1)
+            if seed:
+                sample=SteamTables[phase].data.sample(n=1,random_state=seed)
+            else:
+                sample=SteamTables[phase].data.sample(n=1)
             T=sample['T'].values[0]
             P=sample['P'].values[0]
             super().__init__(T=T,P=P)
